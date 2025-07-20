@@ -120,7 +120,7 @@ services:
       dockerfile: Dockerfile.nginx
       args:
         - HUGO_BASEURL=http://localhost:80
-        - NGINX_VERSION=1.25.3
+        - NGINX_VERSION=1.27.5
     volumes:
       - ./shared:/run/app/
     network_mode: "none"
@@ -158,7 +158,7 @@ services:
     networks:
       - external
     ports:
-      - "3001:3001"
+      - "8080:3001"
     depends_on:
       tor-proxy:
         condition: service_healthy
