@@ -7,7 +7,7 @@
         "ignore_tls": "0",
         "upside_down": "0",
         "docker_host": "1",
-        "docker_container": "tor-tor-frontend",
+        "docker_container": "tor-frontend",
         "proxy_id": "",
         "http_body_encoding": "utf-8",
         "parent": "2"

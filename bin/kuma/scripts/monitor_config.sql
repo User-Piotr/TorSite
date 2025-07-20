@@ -107,7 +107,7 @@ SELECT
     NULL,
     NULL,
     '1',
-    'tor-tor-frontend',
+    'tor-frontend',
     NULL,
     '0',
     '',
