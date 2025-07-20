@@ -3,8 +3,12 @@ FROM louislam/uptime-kuma:1
 # Copy SQL configuration scripts
 COPY ./bin/kuma/scripts/ /tmp/
 
-# Install the procps package
-RUN apt-get update &&  \
+# Fix Debian Buster EOL repository sources and install procps
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' /etc/apt/sources.list
+
+# Update package lists and install procps
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     procps=2:3.3.15-2 && \
     rm -rf /var/lib/apt/lists/* && \
