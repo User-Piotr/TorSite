@@ -9,6 +9,8 @@ services:
     container_name: init-permissions
     profiles:
       - backend
+    cap_drop:
+      - ALL
     volumes:
       - ./domain:/var/lib/tor/hidden_service
       - ./shared:/run/app
@@ -37,6 +39,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-frontend-${DISTRIBUTION:-alpine}
+    cap_drop:
+      - ALL
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -75,6 +79,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-backend-${DISTRIBUTION:-alpine}
+    cap_drop:
+      - ALL
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -121,6 +127,8 @@ services:
       args:
         - HUGO_BASEURL=http://localhost:80
         - NGINX_VERSION=1.27.5
+    cap_drop:
+      - ALL
     volumes:
       - ./shared:/run/app/
     network_mode: "none"
@@ -153,6 +161,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.kuma
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+      - SETGID
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -180,6 +193,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-proxy-${DISTRIBUTION:-alpine}
+    cap_drop:
+      - ALL
     configs:
       - source: torrc-proxy
         target: /etc/tor/torrc
