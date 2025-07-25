@@ -24,3 +24,6 @@ data
 # Private build instructions and todo list ;)
 BUILD.md
 TODO.md
+
+# Security hardening documentation
+HARDENING.md

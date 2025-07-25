@@ -11,6 +11,10 @@ services:
       - backend
     cap_drop:
       - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
     volumes:
       - ./domain:/var/lib/tor/hidden_service
       - ./shared:/run/app
@@ -41,6 +45,8 @@ services:
       dockerfile: Dockerfile.tor-frontend-${DISTRIBUTION:-alpine}
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -81,6 +87,8 @@ services:
       dockerfile: Dockerfile.tor-backend-${DISTRIBUTION:-alpine}
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -129,6 +137,12 @@ services:
         - NGINX_VERSION=1.27.5
     cap_drop:
       - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/cache/nginx:noexec,nosuid,size=50m,uid=101,gid=101,mode=1777
+      - /tmp:noexec,nosuid,nodev,size=50m,uid=101,gid=101,mode=1777
     volumes:
       - ./shared:/run/app/
     network_mode: "none"
@@ -195,6 +209,13 @@ services:
       dockerfile: Dockerfile.tor-proxy-${DISTRIBUTION:-alpine}
     cap_drop:
       - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/log/tor:noexec,nosuid,size=50m,uid=100,gid=101
+      - /var/lib/tor:noexec,nosuid,size=100m,uid=100,gid=101
+      - /tmp:noexec,nosuid,nodev,size=50m
     configs:
       - source: torrc-proxy
         target: /etc/tor/torrc
