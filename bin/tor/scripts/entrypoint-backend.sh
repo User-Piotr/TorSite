@@ -2,6 +2,14 @@
 
 set -e
 
+# Create the hidden service directory and copy config from /etc/tor
+mkdir -p /var/lib/tor/hidden_service
+cp /etc/tor/ob_config /var/lib/tor/hidden_service/ob_config
+
+# Set strict permissions that Tor requires
+chmod 700 /var/lib/tor/hidden_service
+chmod 600 /var/lib/tor/hidden_service/ob_config
+
 # Start Tor in the background
 tor -f "/etc/tor/torrc" &
 
