@@ -1,11 +1,11 @@
 #####################################################################
 
-FROM alpine:3.20.0 AS builder
+FROM alpine:3.22.0 AS builder
 
 # Install required packages
 RUN apk add --no-cache \
-    go=1.22.5-r0 \
-    git=2.45.2-r0
+    go=1.24.4-r0 \
+    git=2.49.1-r0
 
 # Build the Snowflake client
 RUN git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git
@@ -14,7 +14,7 @@ RUN go get && \
     go build
 
 # Use the Alpine image
-FROM alpine:3.20.0
+FROM alpine:3.22.0
 
 LABEL maintainer="Piotr K."
 LABEL version="1.0"
@@ -23,11 +23,12 @@ LABEL vendor=""
 
 # Install required packages
 RUN apk add --no-cache \
-    python3=3.12.3-r1 \
-    py3-pip=24.0-r2 \
-    py3-virtualenv=20.26.2-r0 \
-    tor=0.4.8.12-r0 \
-    acl=2.3.2-r0
+    python3=3.12.11-r0 \
+    py3-pip=25.1.1-r0 \
+    py3-virtualenv=20.31.2-r0 \
+    tor=0.4.8.17-r0 \
+    acl=2.3.2-r1 \
+    lyrebird=0.6.1-r1
 
 # Create a virtual environment
 RUN virtualenv /venv
@@ -78,11 +79,6 @@ COPY --from=builder /snowflake/client/client /usr/bin/snowflake-client
 COPY ./bin/tor/get_tor_connection_status.py /etc/tor/scripts/get_tor_connection_status.py
 COPY ./bin/tor/get_tor_hidden_domain.py /etc/tor/scripts/get_tor_hidden_domain.py
 COPY ./bin/tor/scripts/entrypoint-backend.sh /usr/local/bin/entrypoint.sh
-
-# Get OnionBalance configuration
-COPY --chown=100:101 ./conf/ob_config /var/lib/tor/hidden_service/ob_config
-# Fix permissions on the hidden service directory
-RUN chmod 700 /var/lib/tor/hidden_service
 
 # Make the script executable
 RUN chmod +x /usr/local/bin/entrypoint.sh

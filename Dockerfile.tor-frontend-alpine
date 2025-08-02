@@ -1,11 +1,11 @@
 #####################################################################
 
-FROM alpine:3.20.0 AS builder
+FROM alpine:3.22.0 AS builder
 
 # Install required packages
 RUN apk add --no-cache \
-    go=1.22.5-r0 \
-    git=2.45.2-r0
+    go=1.24.4-r0 \
+    git=2.49.1-r0
 
 # Build the Snowflake client
 RUN git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git
@@ -14,7 +14,7 @@ RUN go get && \
     go build
 
 # Use the Alpine image
-FROM alpine:3.20.0
+FROM alpine:3.22.0
 
 LABEL maintainer="Piotr K."
 LABEL version="1.0"
@@ -23,14 +23,15 @@ LABEL vendor=""
 
 # Install required packages
 RUN apk add --no-cache \
-    python3=3.12.3-r1 \
-    py3-pip=24.0-r2 \
-    py3-virtualenv=20.26.2-r0 \
-    tor=0.4.8.12-r0 \
-    acl=2.3.2-r0 \
+    python3=3.12.11-r0 \
+    py3-pip=25.1.1-r0 \
+    py3-virtualenv=20.31.2-r0 \
+    tor=0.4.8.17-r0 \
+    acl=2.3.2-r1 \
+    lyrebird=0.6.1-r1 \
     # Experimental
     supervisor=4.2.5-r5 \
-    git=2.45.2-r0
+    git=2.49.1-r0
 
 # Create a virtual environment
 RUN virtualenv /venv
@@ -77,6 +78,7 @@ RUN find /venv/lib/python3.12/site-packages/vanguards -type f -exec sed -i 's/re
 # Install OnionBalance
 RUN git clone https://gitlab.torproject.org/tpo/core/onionbalance.git
 WORKDIR /onionbalance
+RUN pip install --no-cache-dir -r requirements.txt
 RUN python3 setup.py install
 
 # Create and set the Tor data directory
