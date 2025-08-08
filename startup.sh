@@ -172,3 +172,4 @@ fi
 deactivate
 
 echo -e "\nStartup script completed."
+echo "You can now access your Tor service at the following addresses: http://${hostname_value}"
