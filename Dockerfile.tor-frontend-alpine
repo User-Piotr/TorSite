@@ -7,11 +7,12 @@ RUN apk add --no-cache \
     go=1.24.4-r0 \
     git=2.49.1-r0
 
+#? NOTE: Snowflake has become less stable; replaced with obfs4proxy for improved reliability.
 # Build the Snowflake client
-RUN git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git
-WORKDIR /snowflake/client
-RUN go get && \
-    go build
+# RUN git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git
+# WORKDIR /snowflake/client
+# RUN go get && \
+#     go build
 
 # Use the Alpine image
 FROM alpine:3.22.0
@@ -84,8 +85,9 @@ RUN python3 setup.py install
 # Create and set the Tor data directory
 RUN mkdir -p /var/lib/tor/hidden_service
 
+#? NOTE: Snowflake has become less stable; replaced with obfs4proxy for improved reliability.
 # Copy the Snowflake binary
-COPY --from=builder /snowflake/client/client /usr/bin/snowflake-client
+# COPY --from=builder /snowflake/client/client /usr/bin/snowflake-client
 
 # Copy the scripts
 COPY ./bin/tor/get_tor_connection_status.py /etc/tor/scripts/get_tor_connection_status.py

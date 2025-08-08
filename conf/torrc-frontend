@@ -19,11 +19,13 @@ CookieAuthentication 1
 UseBridges 1
 SocksPort 9050
 
+# ? Alternatively, you can use the Snowflake client directly
 # ClientTransportPlugin snowflake exec /usr/bin/snowflake-client -log /var/log/tor/snowflake.log
 # Bridge snowflake 192.0.2.3:80 2B280B23E1107BB62ABFC40DDCC8824814F80A72 fingerprint=2B280B23E1107BB62ABFC40DDCC8824814F80A72 url=https://1098762253.rsc.cdn77.org/ fronts=www.cdn77.com,www.phpmyadmin.net ice=stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn
 # Bridge snowflake 192.0.2.4:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=https://1098762253.rsc.cdn77.org/ fronts=www.cdn77.com,www.phpmyadmin.net ice=stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.net:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn
 
-#
+# ? There is a bug in Tor that prevents Conflux from working properly with the obfs4 plugin.
+# https://gitlab.torproject.org/tpo/core/tor/-/issues/41040
 ConfluxEnabled 0
 ClientTransportPlugin obfs4 exec /usr/bin/lyrebird
 Bridge obfs4 91.132.162.134:4443 320A34B3E170F9A0A122AD12D7A4ECEE2CD07239 cert=Qny6CkOZ8yJ9sJpAV35bt1nqca1x5fNTL7bBM8fN27El9op7XzacznlUUO7wyXbd5WhASA iat-mode=0
