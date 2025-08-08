@@ -45,8 +45,13 @@ services:
       dockerfile: Dockerfile.tor-frontend-${DISTRIBUTION:-alpine}
     cap_drop:
       - ALL
+    read_only: true
     security_opt:
       - no-new-privileges:true
+    tmpfs:
+      - /var/lib/tor:noexec,nosuid,size=100m,uid=100,gid=101,mode=0755
+      - /var/log/tor:noexec,nosuid,size=50m,uid=100,gid=101,mode=1755
+      - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
