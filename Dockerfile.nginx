@@ -13,22 +13,22 @@ ENV MORE_HEADERS_VERSION=0.39
 ENV MORE_HEADERS_GITREPO=openresty/headers-more-nginx-module
 
 # Download sources
-RUN wget -q "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -O nginx.tar.gz && \
+RUN wget -q "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -O nginx.tar.gz && \
     wget -q "https://github.com/${MORE_HEADERS_GITREPO}/archive/v${MORE_HEADERS_VERSION}.tar.gz" -O extra_module.tar.gz
 
 # For latest build deps, see https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
 RUN apk add --no-cache --virtual .build-deps \
     gcc=14.2.0-r4\
-    musl-dev=1.2.5-r9 \
+    musl-dev=1.2.5-r11 \
     make=4.4.1-r2 \
-    openssl-dev=3.3.4-r0 \
+    openssl-dev=3.3.7-r0 \
     pcre-dev=8.45-r3 \
-    zlib-dev=1.3.1-r2 \
+    zlib-dev=1.3.2-r0 \
     linux-headers=6.6-r1 \
     libxslt-dev=1.1.42-r2 \
     gd-dev=2.3.3-r9 \
     geoip-dev=1.6.12-r5 \
-    perl-dev=5.40.1-r1 \
+    perl-dev=5.40.4-r0 \
     libedit-dev=20240808.3.1-r0 \
     mercurial=6.9.5-r0 \
     bash=5.2.37-r0 \

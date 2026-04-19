@@ -28,7 +28,10 @@ check_python:
 	@echo "Checking for Python installation..."
 	@which python3 > /dev/null 2>&1 || { echo "Python is not installed. Please install Python." ; exit 1; }
 	@echo "Python is installed."
-	@python3 -c "import venv" 2>/dev/null || { sudo apt-get update && sudo apt-get install python3-venv; }
+	@python3 -c "import venv" 2>/dev/null || { \
+		sudo apt-get update && \
+		sudo apt-get install -y python3$$(python3 -c "import sys; print(f'.{sys.version_info.minor}')")-venv; \
+	}
 
 # Set up virtual environment and install dependencies
 setup_venv:

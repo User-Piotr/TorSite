@@ -17,6 +17,7 @@ venv
 
 # Data
 data
+kuma-v2-data/
 
 # Wireguard
 **/wireguard.conf
@@ -27,3 +28,7 @@ TODO.md
 
 # Security hardening documentation
 HARDENING.md
+
+# AI assistant files
+.claude
+CLAUDE.md

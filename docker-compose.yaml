@@ -5,13 +5,20 @@ x-restart: &restart
 
 services:
   init-permissions:
-    image: alpine:latest
+    image: alpine:3.22.0
     container_name: init-permissions
     profiles:
-      - tor
+      - backend
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
     volumes:
       - ./domain:/var/lib/tor/hidden_service
       - ./shared:/run/app
+    network_mode: "none"
     command: |
       sh -c "
       chown -R 100:101 /var/lib/tor/hidden_service && \
@@ -28,29 +35,36 @@ services:
           cpus: '0.25'
           memory: 64M
 
-  tor:
-    image: tor:${TAG:-dev}
-    container_name: tor
+  onionbalance:
+    image: tor:frontend-${TAG:-dev}
+    container_name: tor-frontend
     profiles:
-      - tor
+      - frontend
     build:
       context: .
-      dockerfile: Dockerfile.tor-${DISTRIBUTION:-alpine}
+      dockerfile: Dockerfile.tor-frontend
+    cap_drop:
+      - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/lib/tor:noexec,nosuid,size=100m,uid=100,gid=101,mode=0755
+      - /var/log/tor:noexec,nosuid,size=50m,uid=100,gid=101,mode=1755
+      - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
+    ulimits:
+      core: 0
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
-      - ./domain:/var/lib/tor/hidden_service
-      - ./shared:/run/app/
+      - ./domain:/hs_keys
     configs:
-      - source: torrc
+      - source: torrc-frontend
         target: /etc/tor/torrc
       - source: vanguards
         target: /etc/tor/vanguards.conf
     networks:
-      - internal
       - external
-    depends_on:
-      - init-permissions
     <<: *restart
     deploy:
       resources:
@@ -68,6 +82,64 @@ services:
       start_interval: 5s
       retries: 3
     labels:
+      - "com.octo.service=onionbalance"
+      - "com.octo.version=${VERSION:-dev}"
+
+  tor-backend:
+    image: tor:backend-${TAG:-dev}
+    profiles:
+      - backend
+    build:
+      context: .
+      dockerfile: Dockerfile.tor-backend
+    cap_drop:
+      - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/lib/tor:noexec,nosuid,size=100m,uid=100,gid=101,mode=0755
+      - /var/log/tor:noexec,nosuid,size=50m,uid=100,gid=101,mode=1755
+      - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
+    ulimits:
+      core: 0
+    environment:
+      - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
+    volumes:
+      - ./shared:/run/app/
+    configs:
+      - source: torrc-backend
+        target: /etc/tor/torrc
+      - source: vanguards
+        target: /etc/tor/vanguards.conf
+      - source: ob-config
+        target: /etc/tor/ob_config
+        uid: "100"
+        gid: "101"
+        mode: 0600
+    networks:
+      - external
+    depends_on:
+      - init-permissions
+    <<: *restart
+    deploy:
+      mode: replicated
+      replicas: ${REPLICAS:-3}
+      endpoint_mode: vip
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+        reservations:
+          cpus: '0.5'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "python", "/etc/tor/scripts/get_tor_connection_status.py"]
+      interval: 30s
+      timeout: 20s
+      start_period: 180s
+      retries: 5
+    labels:
       - "com.octo.service=tor"
       - "com.octo.version=${VERSION:-dev}"
 
@@ -75,17 +147,28 @@ services:
     image: nginx:${TAG:-dev}
     container_name: nginx
     profiles:
-      - tor
+      - backend
     build:
       context: .
       dockerfile: Dockerfile.nginx
       args:
         - HUGO_BASEURL=http://localhost:80
-        - NGINX_VERSION=1.25.3
+        - NGINX_VERSION=1.27.5
+    cap_drop:
+      - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/cache/nginx:noexec,nosuid,size=50m,uid=101,gid=101,mode=1777
+      - /tmp:noexec,nosuid,nodev,size=50m,uid=101,gid=101,mode=1777
+    ulimits:
+      core: 0
     volumes:
       - ./shared:/run/app/
+    network_mode: "none"
     depends_on:
-      tor:
+      tor-backend:
         condition: service_healthy
     <<: *restart
     deploy:
@@ -99,42 +182,129 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "curl -I --fail --unix-socket /run/app/sock http://localhost || exit 1"]
       interval: 30s
-
       timeout: 10s
       retries: 3
     labels:
       - "com.octo.service=nginx"
       - "com.octo.version=${VERSION:-dev}"
 
-  wireguard:
-    image: lscr.io/linuxserver/wireguard:latest
-    container_name: wireguard
+  kuma:
+    image: kuma:${TAG:-dev}
+    container_name: kuma
     profiles:
-      - vpn
+      - monitoring
+    build:
+      context: .
+      dockerfile: Dockerfile.kuma
+    cap_drop:
+      - ALL
     cap_add:
-      - NET_ADMIN
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
+      - NET_RAW
+      - SETGID
     volumes:
-      - ./conf/wireguard.conf:/config/wg_confs/wireguard.conf
-    ports:
-      - 51820:51820/udp
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - internal
       - external
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
+    ports:
+      - "127.0.0.1:8080:3001"
+    depends_on:
+      tor-proxy:
+        condition: service_healthy
     <<: *restart
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 128M
-        reservations:
           cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
           memory: 64M
+
+  # Uptime Kuma v2 — isolated test instance.
+  # Use profile "monitoring-v2" to start alongside tor-proxy without touching v1 data.
+  # Data stored in ./kuma-v2-data (bind mount, gitignored).
+  # SQL scripts (bin/kuma/scripts/) need schema verification against v2 before use —
+  # v2 changed the heartbeat table and monitor column layout. Configure manually via UI first.
+  kuma-v2:
+    image: louislam/uptime-kuma:2
+    container_name: kuma-v2
+    profiles:
+      - monitoring
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - CHOWN
+      - FOWNER
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./kuma-v2-data:/app/data
+    networks:
+      - external
+    ports:
+      - "127.0.0.1:8081:3001"
+    depends_on:
+      tor-proxy:
+        condition: service_healthy
+    <<: *restart
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  tor-proxy:
+    image: tor:proxy-${TAG:-dev}
+    container_name: tor-proxy
+    profiles:
+      - monitoring
+    build:
+      context: .
+      dockerfile: Dockerfile.tor-proxy
+    cap_drop:
+      - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/log/tor:noexec,nosuid,size=50m,uid=100,gid=101
+      - /var/lib/tor:noexec,nosuid,size=100m,uid=100,gid=101
+      - /tmp:noexec,nosuid,nodev,size=50m
+    ulimits:
+      core: 0
+    configs:
+      - source: torrc-proxy
+        target: /etc/tor/torrc
+    networks:
+      - external
+    ports:
+      - "127.0.0.1:9050:9050"
+    <<: *restart
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "python", "/etc/tor/scripts/get_tor_connection_status.py"]
+      interval: 30s
+      timeout: 20s
+      start_period: 180s
+      retries: 5
+    labels:
+      - "com.octo.service=proxy"
+      - "com.octo.version=${VERSION:-dev}"
 
 networks:
   internal:
@@ -152,9 +322,13 @@ networks:
     internal: false
 
 configs:
-  torrc:
-    file: ./conf/torrc
+  torrc-frontend:
+    file: ./conf/torrc-frontend
+  torrc-backend:
+    file: ./conf/torrc-backend
+  torrc-proxy:
+    file: ./conf/torrc-proxy
   vanguards:
     file: ./conf/vanguards.conf
-  wireguard:
-    file: ./conf/wireguard.conf
+  ob-config:
+    file: ./conf/ob_config

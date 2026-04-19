@@ -23,8 +23,9 @@ AutomapHostsOnResolve 1
 SocksPolicy accept 127.0.0.1,accept 10.0.0.0/8,accept 172.16.0.0/12,accept 192.168.0.0/16
 SocksPolicy reject *
 
-# Snowflake configuration
-ClientTransportPlugin snowflake exec /usr/bin/snowflake-client -log /var/log/tor/snowflake.log
-
-Bridge snowflake 192.0.2.3:80 2B280B23E1107BB62ABFC40DDCC8824814F80A72 fingerprint=2B280B23E1107BB62ABFC40DDCC8824814F80A72 url=https://1098762253.rsc.cdn77.org/ fronts=www.cdn77.com,www.phpmyadmin.net ice=stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn
-Bridge snowflake 192.0.2.4:80 8838024498816A039FCBBAB14E6F40A0843051FA fingerprint=8838024498816A039FCBBAB14E6F40A0843051FA url=https://1098762253.rsc.cdn77.org/ fronts=www.cdn77.com,www.phpmyadmin.net ice=stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.net:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478 utls-imitate=hellorandomizedalpn
+# ? There is a bug in Tor that prevents Conflux from working properly with the obfs4 plugin.
+# https://gitlab.torproject.org/tpo/core/tor/-/issues/41040
+ConfluxEnabled 0
+ClientTransportPlugin obfs4 exec /usr/bin/lyrebird
+Bridge obfs4 75.56.12.77:34900 636E13048BC4849DA2071F50018F6F6BDCAC7729 cert=47M1jyZIYrCZbol/SEQMubJXrso/BAgiIzcMpKXiQzWUnYxflkdawC4vixH+PcYsXQbvew iat-mode=0
+Bridge obfs4 87.238.185.72:9051 3D98D0085CF5D39149107048C7272746AF0E54C8 cert=Zi2OyrcZefl5q4KMHpeYH4NRsA/YPnv2du1AhS46Rrl6vWrtlqHoTrCcrmW94aDEONpmIg iat-mode=0

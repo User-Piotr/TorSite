@@ -1,5 +1,11 @@
 *.md
-LICENSE
 *.sh
 Makefile
+
+.claude
+
+domain/
+shared/
+kuma-v2-data/
+
 onionscan

@@ -28,5 +28,5 @@ SocksPort 9050
 # https://gitlab.torproject.org/tpo/core/tor/-/issues/41040
 ConfluxEnabled 0
 ClientTransportPlugin obfs4 exec /usr/bin/lyrebird
-Bridge obfs4 91.132.162.134:4443 320A34B3E170F9A0A122AD12D7A4ECEE2CD07239 cert=Qny6CkOZ8yJ9sJpAV35bt1nqca1x5fNTL7bBM8fN27El9op7XzacznlUUO7wyXbd5WhASA iat-mode=0
-Bridge obfs4 37.18.133.75:44821 D40DA77CA68F39666F77CE8BA6FF332BF8DB3F31 cert=B4yVW8heE83luCJt+oQN1kDB/j4kWkNx6mtOc9O6GhLAV8zJx0lfUI6zWO9UxUoV5PX/Zw iat-mode=0
+Bridge obfs4 75.56.12.77:34900 636E13048BC4849DA2071F50018F6F6BDCAC7729 cert=47M1jyZIYrCZbol/SEQMubJXrso/BAgiIzcMpKXiQzWUnYxflkdawC4vixH+PcYsXQbvew iat-mode=0
+Bridge obfs4 87.238.185.72:9051 3D98D0085CF5D39149107048C7272746AF0E54C8 cert=Zi2OyrcZefl5q4KMHpeYH4NRsA/YPnv2du1AhS46Rrl6vWrtlqHoTrCcrmW94aDEONpmIg iat-mode=0

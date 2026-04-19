@@ -43,15 +43,15 @@ check_health() {
 }
 
 # Load environment variables from .env file
-if [ -f .env ]; then
-    while IFS='=' read -r key value; do
-        if [[ $key != \#* && $key != "" ]]; then
-            export "$key"="$value"
-            echo "Loaded $key=$value"
-        fi
-    done <.env
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -f "${SCRIPT_DIR}/.env" ]; then
+    set -a
+    source "${SCRIPT_DIR}/.env"
+    set +a
 else
-    echo ".env file not found"
+    echo ".env file not found at ${SCRIPT_DIR}/.env"
+    exit 1
 fi
 
 # Check if critical variables are set
@@ -86,13 +86,19 @@ else
     echo "Directory already exists: $DIRECTORY"
 fi
 
-# Get .onion hostname
-if [ -f "${DIRECTORY}/hostname" ]; then
-    echo "File exists: ${DIRECTORY}/hostname"
+# Get .onion hostname — auto-discover the .onion subdirectory
+ONION_DIR=$(find "${DIRECTORY}" -maxdepth 1 -type d -name "*.onion" | head -n 1)
 
-    hostname_value=$(sudo cat "${DIRECTORY}/hostname")
+if [ -z "$ONION_DIR" ]; then
+    echo "No .onion subdirectory found in ${DIRECTORY}."
+    exit 1
+fi
+
+if [ -f "${ONION_DIR}/hostname" ]; then
+    echo "File exists: ${ONION_DIR}/hostname"
+    hostname_value=$(sudo cat "${ONION_DIR}/hostname")
 else
-    echo "File does not exist: ${DIRECTORY}/hostname"
+    echo "File does not exist: ${ONION_DIR}/hostname"
     echo "Unable to proceed without hostname file."
     exit 1
 fi
@@ -115,13 +121,13 @@ echo "Running docker-compose..."
 
 if command -v docker-compose >/dev/null 2>&1; then
     docker-compose -p "$PROJECT_NAME" \
-        -f docker-compose-onionbalance.yaml \
+        -f docker-compose.yaml \
         --profile "$BACKEND_PROFILE" up \
         -d --build --force-recreate
     check_health "$SERVICE_NAME"
 elif command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
     docker compose -p "$PROJECT_NAME" \
-        -f docker-compose-onionbalance.yaml \
+        -f docker-compose.yaml \
         --profile "$BACKEND_PROFILE" up \
         -d --build --force-recreate
     check_health "$SERVICE_NAME"
@@ -136,6 +142,10 @@ for instance in $(seq 1 "$REPLICAS"); do
     domains+=("$domain")
 done
 
+# Derive the container-internal key path from the discovered .onion directory.
+# Volume ./domain is mounted at /hs_keys inside the container.
+KEY_LOCATION="/hs_keys/$(basename "$ONION_DIR")/hs_ed25519_secret_key"
+
 # Generate the frontend configuration file.
 python3 ./scripts/config_generator.py config --log_level "$LOG_LEVEL" --log_location "$LOG_LOCATION" --domains "${domains[@]}" --key_path "$KEY_LOCATION"
 # Generate the monitoring configuration file.
@@ -143,23 +153,23 @@ python3 ./scripts/config_generator.py monitor_config --master_onion_address "htt
 
 if command -v docker-compose >/dev/null 2>&1; then
     docker-compose -p "$PROJECT_NAME" \
-        -f docker-compose-onionbalance.yaml \
+        -f docker-compose.yaml \
         --profile "$FRONTEND_PROFILE" up \
         -d --build --force-recreate
 
     docker-compose -p "$PROJECT_NAME" \
-        -f docker-compose-onionbalance.yaml \
+        -f docker-compose.yaml \
         --profile "$MONITOR_PROFILE" up \
         -d --build --force-recreate
 
 elif command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
     docker compose -p "$PROJECT_NAME" \
-        -f docker-compose-onionbalance.yaml \
+        -f docker-compose.yaml \
         --profile "$FRONTEND_PROFILE" up \
         -d --build --force-recreate
 
     docker compose -p "$PROJECT_NAME" \
-        -f docker-compose-onionbalance.yaml \
+        -f docker-compose.yaml \
         --profile "$MONITOR_PROFILE" up \
         -d --build --force-recreate
 else

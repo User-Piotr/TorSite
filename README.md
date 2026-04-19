@@ -11,6 +11,7 @@ It is designed for users seeking a highly automated setup with tools for domain 
 
 - Docker
 - Docker Compose
+- Make
 
 It is good to have a basic understanding of Docker and Docker Compose before using this project.
 

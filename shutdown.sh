@@ -6,16 +6,17 @@ set -e # Exit on error
 REMOVE_IMAGE=false
 
 # Load environment variables from .env file
-if [ -f .env ]; then
-    while IFS='=' read -r key value; do
-        if [[ $key != \#* && $key != "" ]]; then
-            export "$key"="$value"
-            echo "Loaded $key=$value"
-        fi
-    done <.env
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -f "${SCRIPT_DIR}/.env" ]; then
+    set -a
+    source "${SCRIPT_DIR}/.env"
+    set +a
 else
-    echo ".env file not found"
+    echo ".env file not found at ${SCRIPT_DIR}/.env"
+    exit 1
 fi
+
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -58,7 +59,7 @@ fi
 # Optionally remove project images
 if [ "$REMOVE_IMAGE" = true ]; then
     echo "Searching for images with tag: $TAG..."
-    IMAGE_IDS=$(docker images | grep "$TAG" | awk '{print $3}')
+    IMAGE_IDS=$(docker images --format "{{.ID}} {{.Tag}}" | grep "${TAG}" | awk '{print $1}')
 
     if [ -z "$IMAGE_IDS" ]; then
         echo "No images found with tag: $TAG."
