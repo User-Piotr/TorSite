@@ -77,10 +77,11 @@ RUN find /venv/lib/python3.12/site-packages/vanguards -type f -exec sed -i 's/Sa
 RUN find /venv/lib/python3.12/site-packages/vanguards -type f -exec sed -i 's/readfp/read_file/g' {} \;
 
 # Install OnionBalance
-RUN git clone https://gitlab.torproject.org/tpo/core/onionbalance.git
-WORKDIR /onionbalance
-RUN pip install --no-cache-dir -r requirements.txt
-RUN python3 setup.py install
+RUN git clone https://gitlab.torproject.org/tpo/core/onionbalance.git && \
+    cd onionbalance && \
+    git checkout 0.2.4 && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir .
 
 # Create and set the Tor data directory
 RUN mkdir -p /var/lib/tor/hidden_service
@@ -102,9 +103,6 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Set the default ACL for /tmp
 RUN setfacl -d -m u:tor:rwx /tmp && \
     setfacl -m u:tor:rwx /tmp
-
-# Define the volumes
-VOLUME /var/lib/tor/hidden_service/
 
 # Run Tor (non-daemon mode)
 USER tor

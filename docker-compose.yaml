@@ -188,6 +188,30 @@ services:
       - "com.octo.service=nginx"
       - "com.octo.version=${VERSION:-dev}"
 
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: docker-socket-proxy
+    profiles:
+      - monitoring
+    cap_drop:
+      - ALL
+    environment:
+      CONTAINERS: 1
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - internal
+    <<: *restart
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+
   kuma:
     image: kuma:${TAG:-dev}
     container_name: kuma
@@ -199,17 +223,19 @@ services:
     cap_drop:
       - ALL
     cap_add:
-      - NET_RAW
       - SETGID
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=tcp://docker-socket-proxy:2375
     networks:
       - external
+      - internal
     ports:
       - "127.0.0.1:8080:3001"
     depends_on:
       tor-proxy:
         condition: service_healthy
+      docker-socket-proxy:
+        condition: service_started
     <<: *restart
     deploy:
       resources:
@@ -236,16 +262,18 @@ services:
       - SETGID
       - CHOWN
       - FOWNER
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./kuma-v2-data:/app/data
+    environment:
+      - DOCKER_HOST=tcp://docker-socket-proxy:2375
     networks:
       - external
+      - internal
     ports:
       - "127.0.0.1:8081:3001"
     depends_on:
       tor-proxy:
         condition: service_healthy
+      docker-socket-proxy:
+        condition: service_started
     <<: *restart
     deploy:
       resources:
