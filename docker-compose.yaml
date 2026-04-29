@@ -189,7 +189,7 @@ services:
       - "com.octo.version=${VERSION:-dev}"
 
   docker-socket-proxy:
-    image: tecnativa/docker-socket-proxy:latest
+    image: linuxserver/socket-proxy:3.2.16
     container_name: docker-socket-proxy
     profiles:
       - monitoring
@@ -247,8 +247,7 @@ services:
           memory: 64M
 
   # Uptime Kuma v2 — isolated test instance.
-  # Use profile "monitoring-v2" to start alongside tor-proxy without touching v1 data.
-  # Data stored in ./kuma-v2-data (bind mount, gitignored).
+  # Uptime Kuma v2 — isolated test instance. No persistent storage (container layer only).
   # SQL scripts (bin/kuma/scripts/) need schema verification against v2 before use —
   # v2 changed the heartbeat table and monitor column layout. Configure manually via UI first.
   kuma-v2:
@@ -256,12 +255,11 @@ services:
     container_name: kuma-v2
     profiles:
       - monitoring
+    user: "1000:1000"
     cap_drop:
       - ALL
     cap_add:
       - SETGID
-      - CHOWN
-      - FOWNER
     environment:
       - DOCKER_HOST=tcp://docker-socket-proxy:2375
     networks:
