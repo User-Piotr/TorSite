@@ -17,7 +17,10 @@ venv
 
 # Data
 data
-kuma-v2-data/
+
+# Generated kuma configs
+bin/kuma/scripts/monitor_config.sql
+bin/kuma/scripts/basic_config.sql
 
 # Wireguard
 **/wireguard.conf

@@ -107,6 +107,29 @@ def generate_monitor_config(env: Environment, master_onion_address: str) -> None
         print(f"An error occurred while generating monitor_config: {e}")
 
 
+def generate_basic_config(
+    env: Environment,
+    project_name: str,
+    docker_socket_proxy: str,
+    socks_host: str,
+    socks_port: str,
+) -> None:
+    
+    try:
+        template = env.get_template("basic_config.template")
+        output = template.render(
+            project_name=project_name,
+            docker_socket_proxy=docker_socket_proxy,
+            socks_host=socks_host,
+            socks_port=socks_port,
+        )
+        with open("bin/kuma/scripts/basic_config.sql", "w") as conf:
+            conf.write(output)
+        print("basic_config generated successfully.")
+    except Exception as e:
+        print(f"An error occurred while generating basic_config: {e}")
+
+
 def prepare(args: argparse.Namespace):
     env = Environment(loader=FileSystemLoader("scripts/templates"))
 
@@ -121,6 +144,15 @@ def prepare(args: argparse.Namespace):
     if args.config_type == "monitor_config" or args.config_type == "all":
         generate_monitor_config(env, args.master_onion_address)
 
+    if args.config_type == "basic_config" or args.config_type == "all":
+        generate_basic_config(
+            env,
+            args.project_name,
+            args.docker_socket_proxy,
+            args.socks_host,
+            args.socks_port,
+        )
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -128,7 +160,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "config_type",
-        choices=["ob_config", "config", "monitor_config", "all"],
+        choices=["ob_config", "config", "monitor_config", "basic_config", "all"],
         help="Type of configuration to generate.",
     )
     parser.add_argument(
@@ -149,6 +181,10 @@ if __name__ == "__main__":
         "--key_path",
         help="Path to the secret key file for the config.",
     )
+    parser.add_argument("--project_name", default="otco")
+    parser.add_argument("--docker_socket_proxy", default="docker-socket-proxy:2375")
+    parser.add_argument("--socks_host", default="tor-proxy")
+    parser.add_argument("--socks_port", default="9050")
     args = parser.parse_args()
 
     if (

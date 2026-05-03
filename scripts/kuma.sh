@@ -3,7 +3,7 @@ set -e  # Exit on error.
 
 # Default value for the Docker container name.
 CONTAINER_NAME="${1:-kuma}"
-SQL_SCRIPTS=("/tmp/monitor_config.sql" "/tmp/basic_config.sql")
+SQL_SCRIPTS=("/tmp/basic_config.sql" "/tmp/monitor_config.sql")
 
 # Check if the SQL scripts are present in the container.
 MISSING_FILES=false

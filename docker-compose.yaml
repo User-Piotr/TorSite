@@ -213,46 +213,8 @@ services:
           memory: 32M
 
   kuma:
-    image: kuma:${TAG:-dev}
+    image: louislam/uptime-kuma:2.2.1
     container_name: kuma
-    profiles:
-      - monitoring
-    build:
-      context: .
-      dockerfile: Dockerfile.kuma
-    cap_drop:
-      - ALL
-    cap_add:
-      - SETGID
-    environment:
-      - DOCKER_HOST=tcp://docker-socket-proxy:2375
-    networks:
-      - external
-      - internal
-    ports:
-      - "127.0.0.1:8080:3001"
-    depends_on:
-      tor-proxy:
-        condition: service_healthy
-      docker-socket-proxy:
-        condition: service_started
-    <<: *restart
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 64M
-
-  # Uptime Kuma v2 — isolated test instance.
-  # Uptime Kuma v2 — isolated test instance. No persistent storage (container layer only).
-  # SQL scripts (bin/kuma/scripts/) need schema verification against v2 before use —
-  # v2 changed the heartbeat table and monitor column layout. Configure manually via UI first.
-  kuma-v2:
-    image: louislam/uptime-kuma:2
-    container_name: kuma-v2
     profiles:
       - monitoring
     user: "1000:1000"
@@ -266,7 +228,7 @@ services:
       - external
       - internal
     ports:
-      - "127.0.0.1:8081:3001"
+      - "127.0.0.1:8080:3001"
     depends_on:
       tor-proxy:
         condition: service_healthy

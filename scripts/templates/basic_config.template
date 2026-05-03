@@ -4,12 +4,12 @@ INSERT INTO
     "main"."docker_host" ("user_id", "docker_daemon", "docker_type", "name")
 SELECT
     '1',
-    'tcp://docker-socket-proxy:2375',
+    'tcp://{{ docker_socket_proxy }}',
     'tcp',
-    'otco'
+    '{{ project_name }}'
 WHERE
     NOT EXISTS (
-        SELECT 1 FROM "main"."docker_host" WHERE "name" = 'otco'
+        SELECT 1 FROM "main"."docker_host" WHERE "name" = '{{ project_name }}'
     );
 
 INSERT INTO "main"."proxy" (
@@ -17,9 +17,9 @@ INSERT INTO "main"."proxy" (
     "password", "active", "default", "created_date"
 )
 SELECT
-    '1', 'socks', 'tor-proxy', '9050', '0', NULL, NULL, '1', '0', DATETIME('now')
+    '1', 'socks', '{{ socks_host }}', '{{ socks_port }}', '0', NULL, NULL, '1', '0', DATETIME('now')
 WHERE NOT EXISTS (
-    SELECT 1 FROM "main"."proxy" WHERE "host" = 'tor-proxy'
+    SELECT 1 FROM "main"."proxy" WHERE "host" = '{{ socks_host }}'
 );
 
 COMMIT;

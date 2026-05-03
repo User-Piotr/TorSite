@@ -139,7 +139,7 @@ SELECT
     NULL,
     NULL,
     NULL,
-    {% if monitor.parent %}'{{ monitor.parent }}'{% else %}NULL{% endif %},
+    {% if monitor.parent_name %}(SELECT "id" FROM "main"."monitor" WHERE "name" = '{{ monitor.parent_name }}'){% else %}NULL{% endif %},
     '0',
     NULL,
     NULL,
