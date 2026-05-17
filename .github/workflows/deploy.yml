@@ -90,20 +90,20 @@ jobs:
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,scope=nginx,mode=max
 
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: self-hosted
-    environment: production
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Pull and deploy
-        env:
-          TAG: ${{ needs.build.outputs.tag }}
-          IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
-        run: |
-          docker compose pull
-          docker compose --profile backend --profile frontend up -d --remove-orphans
+  # deploy:
+  #   name: Deploy
+  #   needs: build
+  #   runs-on: self-hosted
+  #   environment: production
+  #
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Pull and deploy
+  #       env:
+  #         TAG: ${{ needs.build.outputs.tag }}
+  #         IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
+  #       run: |
+  #         docker compose pull
+  #         docker compose --profile backend --profile frontend up -d --remove-orphans
