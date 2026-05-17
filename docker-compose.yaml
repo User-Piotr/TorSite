@@ -63,6 +63,8 @@ services:
         target: /etc/tor/torrc
       - source: vanguards
         target: /etc/tor/vanguards.conf
+      - source: ob-balance-config
+        target: /onionbalance/config.yaml
     networks:
       - external
     <<: *restart
@@ -320,3 +322,5 @@ configs:
     file: ./conf/vanguards.conf
   ob-config:
     file: ./conf/ob_config
+  ob-balance-config:
+    file: ./conf/config.yaml

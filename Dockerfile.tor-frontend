@@ -94,7 +94,6 @@ RUN mkdir -p /var/lib/tor/hidden_service
 COPY ./bin/tor/get_tor_connection_status.py /etc/tor/scripts/get_tor_connection_status.py
 COPY ./bin/tor/get_tor_hidden_domain.py /etc/tor/scripts/get_tor_hidden_domain.py
 COPY ./bin/tor/scripts/entrypoint-frontend.sh /usr/local/bin/entrypoint.sh
-COPY ./conf/config.yaml /onionbalance/config.yaml
 COPY ./conf/supervisord.conf /supervisor/supervisord.conf
 
 # Make the script executable
