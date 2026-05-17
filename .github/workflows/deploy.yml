@@ -1,0 +1,109 @@
+name: Build and Deploy
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    name: Build and push images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      image_prefix: ${{ steps.meta.outputs.image_prefix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "image_prefix=ghcr.io/${OWNER}/${REPO}" >> $GITHUB_OUTPUT
+
+      - name: Build and push tor-backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.tor-backend
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_prefix }}/tor-backend:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image_prefix }}/tor-backend:latest
+          cache-from: type=gha,scope=tor-backend
+          cache-to: type=gha,scope=tor-backend,mode=max
+
+      - name: Build and push tor-frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.tor-frontend
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_prefix }}/tor-frontend:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image_prefix }}/tor-frontend:latest
+          cache-from: type=gha,scope=tor-frontend
+          cache-to: type=gha,scope=tor-frontend,mode=max
+
+      - name: Build and push tor-proxy
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.tor-proxy
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_prefix }}/tor-proxy:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image_prefix }}/tor-proxy:latest
+          cache-from: type=gha,scope=tor-proxy
+          cache-to: type=gha,scope=tor-proxy,mode=max
+
+      - name: Build and push nginx
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.nginx
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_prefix }}/nginx:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image_prefix }}/nginx:latest
+          build-args: |
+            NGINX_VERSION=1.27.5
+            HUGO_BASEURL=${{ vars.HUGO_BASEURL }}
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,scope=nginx,mode=max
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: self-hosted
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull and deploy
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
+          IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
+        run: |
+          docker compose pull
+          docker compose --profile backend --profile frontend up -d --remove-orphans

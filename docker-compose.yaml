@@ -36,7 +36,7 @@ services:
           memory: 64M
 
   onionbalance:
-    image: tor:frontend-${TAG:-dev}
+    image: ${IMAGE_PREFIX:-ghcr.io/user-piotr/torsite}/tor-frontend:${TAG:-latest}
     container_name: tor-frontend
     profiles:
       - frontend
@@ -86,7 +86,7 @@ services:
       - "com.octo.version=${VERSION:-dev}"
 
   tor-backend:
-    image: tor:backend-${TAG:-dev}
+    image: ${IMAGE_PREFIX:-ghcr.io/user-piotr/torsite}/tor-backend:${TAG:-latest}
     profiles:
       - backend
     build:
@@ -144,7 +144,7 @@ services:
       - "com.octo.version=${VERSION:-dev}"
 
   nginx:
-    image: nginx:${TAG:-dev}
+    image: ${IMAGE_PREFIX:-ghcr.io/user-piotr/torsite}/nginx:${TAG:-latest}
     container_name: nginx
     profiles:
       - backend
@@ -250,7 +250,7 @@ services:
       retries: 3
 
   tor-proxy:
-    image: tor:proxy-${TAG:-dev}
+    image: ${IMAGE_PREFIX:-ghcr.io/user-piotr/torsite}/tor-proxy:${TAG:-latest}
     container_name: tor-proxy
     profiles:
       - monitoring

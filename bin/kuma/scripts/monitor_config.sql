@@ -416,7 +416,7 @@ SELECT
     '1',
     '1',
     '60',
-    'http://test.onion',
+    'http://piotrk6f3m4xl5iuhf5m3f6eajrxhjhrybgpo3tiu7tjz3ye4jkqjiyd.onion',
     'http',
     '2000',
     NULL,
