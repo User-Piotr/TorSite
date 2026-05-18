@@ -5,7 +5,7 @@
 
 Dockerized Tor hidden service with high-availability via OnionBalance, nginx reverse proxy, obfs4 bridge transport, and Uptime Kuma monitoring.
 
-
+![Logo](images/logo.jpg)
 
 ## Architecture
 
