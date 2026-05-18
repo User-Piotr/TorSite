@@ -113,7 +113,6 @@ jobs:
         run: |
           ONION_DIR="domain/${ONION_ADDRESS}"
           mkdir -p "$ONION_DIR"
-          chmod 700 domain "$ONION_DIR"
           echo "${{ secrets.HS_SECRET_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_secret_key"
           echo "${{ secrets.HS_PUBLIC_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_public_key"
           echo "$ONION_ADDRESS" > "${ONION_DIR}/hostname"
@@ -143,3 +142,7 @@ jobs:
         run: |
           docker compose -p octo pull
           docker compose -p octo --profile app up -d --remove-orphans
+
+      - name: Fix workspace permissions
+        if: always()
+        run: sudo chown -R $USER:$USER .
