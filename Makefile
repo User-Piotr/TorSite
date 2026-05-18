@@ -20,7 +20,7 @@ check_docker:
 # Check for Docker Compose installation
 check_docker_compose:
 	@echo "Checking for Docker Compose installation..."
-	@which docker-compose > /dev/null 2>&1 || (echo "Docker Compose is not installed. Please install Docker Compose." && exit 1)
+	@docker compose version > /dev/null 2>&1 || (echo "Docker Compose is not installed. Please install Docker Compose." && exit 1)
 	@echo "Docker Compose is installed."
 
 # Check for Python installation
