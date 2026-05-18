@@ -3,9 +3,9 @@
 [![Build](https://github.com/User-Piotr/TorSite/actions/workflows/deploy.yml/badge.svg)](https://github.com/User-Piotr/TorSite/actions/workflows/deploy.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-Dockerized Tor hidden service with high-availability via OnionBalance, nginx reverse proxy, obfs4 bridge transport, and Uptime Kuma monitoring. Built on Alpine Linux.
+Dockerized Tor hidden service with high-availability via OnionBalance, nginx reverse proxy, obfs4 bridge transport, and Uptime Kuma monitoring.
 
-![Logo](images/logo.jpg)
+
 
 ## Architecture
 
