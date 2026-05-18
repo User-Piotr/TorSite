@@ -41,6 +41,14 @@ Dockerized Tor hidden service with high-availability via OnionBalance, nginx rev
 **Vanguards:** bandguards, rendguards, circuit close-on-attack enabled  
 **CI/CD:** GitHub Actions → GHCR
 
+## Prerequisites
+
+- Docker
+- Docker Compose v2
+- Python 3 + pip
+- Make
+- Root access (HS key permissions)
+
 ## Quick Start
 
 **1. Generate .onion domain**
