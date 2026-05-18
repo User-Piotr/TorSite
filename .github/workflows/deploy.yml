@@ -91,7 +91,7 @@ jobs:
             ${{ steps.meta.outputs.image_prefix }}/nginx:latest
           build-args: |
             NGINX_VERSION=1.27.5
-            HUGO_BASEURL=${{ vars.ONION_ADDRESS }}
+            HUGO_BASEURL=http://${{ vars.ONION_ADDRESS }}
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,scope=nginx,mode=max
 
@@ -111,21 +111,18 @@ jobs:
         env:
           ONION_ADDRESS: ${{ vars.ONION_ADDRESS }}
         run: |
-          # Extract hostname from address (strip http:// prefix)
-          HOSTNAME=${ONION_ADDRESS#http://}
-          ONION_DIR="domain/${HOSTNAME}"
+          ONION_DIR="domain/${ONION_ADDRESS}"
           mkdir -p "$ONION_DIR"
           chmod 700 domain "$ONION_DIR"
           echo "${{ secrets.HS_SECRET_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_secret_key"
           echo "${{ secrets.HS_PUBLIC_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_public_key"
-          echo "$HOSTNAME" > "${ONION_DIR}/hostname"
+          echo "$ONION_ADDRESS" > "${ONION_DIR}/hostname"
           chmod 600 "${ONION_DIR}/hs_ed25519_secret_key" "${ONION_DIR}/hs_ed25519_public_key"
 
       - name: Generate configs
         env:
           ONION_ADDRESS: ${{ vars.ONION_ADDRESS }}
         run: |
-          HOSTNAME=${ONION_ADDRESS#http://}
           python3 scripts/config_generator.py ob_config \
             --master_onion_address "$ONION_ADDRESS"
           python3 scripts/config_generator.py config \
@@ -133,15 +130,16 @@ jobs:
             --domains ${{ vars.BACKEND_DOMAINS }} \
             --log_level notice \
             --log_location /var/log/tor/onionbalance.log \
-            --key_path "/hs_keys/${HOSTNAME}/hs_ed25519_secret_key"
+            --key_path "/hs_keys/${ONION_ADDRESS}/hs_ed25519_secret_key"
           python3 scripts/config_generator.py monitor_config \
-            --master_onion_address "$ONION_ADDRESS"
+            --master_onion_address "http://$ONION_ADDRESS"
           python3 scripts/config_generator.py basic_config
 
       - name: Pull and deploy
         env:
           TAG: ${{ needs.build.outputs.tag }}
           IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
+          REPLICAS: ${{ vars.REPLICAS }}
         run: |
           docker compose -p octo pull
           docker compose -p octo --profile app up -d --remove-orphans
