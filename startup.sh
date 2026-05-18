@@ -128,8 +128,8 @@ fi
 
 echo "Running docker-compose..."
 
-# Start app (backend + frontend) via app profile
-compose --profile app up -d $BUILD_FLAGS
+# Start backends first — frontend needs their domains to generate config.yaml
+compose --profile backend up -d $BUILD_FLAGS
 check_health "$SERVICE_NAME"
 
 for instance in $(seq 1 "$REPLICAS"); do
@@ -142,9 +142,12 @@ done
 # Volume ./domain is mounted at /hs_keys inside the container.
 KEY_LOCATION="/hs_keys/$(basename "$ONION_DIR")/hs_ed25519_secret_key"
 
-# Generate the frontend and monitoring configuration files.
+# Generate frontend and monitoring configs now that backend domains are known.
 python3 ./scripts/config_generator.py config --log_level "$LOG_LEVEL" --log_location "$LOG_LOCATION" --domains "${domains[@]}" --key_path "$KEY_LOCATION"
 python3 ./scripts/config_generator.py monitor_config --master_onion_address "http://${hostname_value}"
+
+# Start frontend now that config.yaml exists
+compose --profile frontend up -d $BUILD_FLAGS
 
 # Start monitoring if enabled
 if [ "${MONITORING:-false}" = "true" ]; then
