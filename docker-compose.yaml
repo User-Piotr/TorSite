@@ -9,6 +9,7 @@ services:
     container_name: init-permissions
     profiles:
       - backend
+      - app
     cap_drop:
       - ALL
     cap_add:
@@ -40,6 +41,7 @@ services:
     container_name: tor-frontend
     profiles:
       - frontend
+      - app
     build:
       context: .
       dockerfile: Dockerfile.tor-frontend
@@ -91,6 +93,7 @@ services:
     image: ${IMAGE_PREFIX:-ghcr.io/user-piotr/torsite}/tor-backend:${TAG:-latest}
     profiles:
       - backend
+      - app
     build:
       context: .
       dockerfile: Dockerfile.tor-backend
@@ -150,6 +153,7 @@ services:
     container_name: nginx
     profiles:
       - backend
+      - app
     build:
       context: .
       dockerfile: Dockerfile.nginx

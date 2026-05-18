@@ -3,11 +3,8 @@
 # Exit on error
 set -e
 
-# Define default project name
+# Define defaults
 SERVICE_NAME="tor-backend"
-BACKEND_PROFILE="backend"
-FRONTEND_PROFILE="frontend"
-MONITOR_PROFILE="monitoring"
 VENV_DIR="venv"
 domains=()
 
@@ -42,6 +39,11 @@ check_health() {
     done
 }
 
+# docker compose wrapper
+compose() {
+    docker compose -p "$PROJECT_NAME" -f docker-compose.yaml "$@"
+}
+
 # Load environment variables from .env file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -55,7 +57,7 @@ else
 fi
 
 # Check if critical variables are set
-if [ -z "$PROJECT_NAME" ] || [ -z "$BACKEND_PROFILE" ] || [ -z "$FRONTEND_PROFILE" ] || [ -z "$REPLICAS" ]; then
+if [ -z "$PROJECT_NAME" ] || [ -z "$REPLICAS" ]; then
     echo "Critical variables are not set."
     exit 1
 fi
@@ -117,24 +119,18 @@ else
     exit 1
 fi
 
+# BUILD=true  → build locally from Dockerfiles (default)
+# BUILD=false → pull from GHCR using TAG (latest or specific version)
+BUILD_FLAGS=""
+if [ "${BUILD:-true}" = "true" ]; then
+    BUILD_FLAGS="--build --force-recreate --pull never"
+fi
+
 echo "Running docker-compose..."
 
-if command -v docker-compose >/dev/null 2>&1; then
-    docker-compose -p "$PROJECT_NAME" \
-        -f docker-compose.yaml \
-        --profile "$BACKEND_PROFILE" up \
-        -d --build --force-recreate
-    check_health "$SERVICE_NAME"
-elif command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
-    docker compose -p "$PROJECT_NAME" \
-        -f docker-compose.yaml \
-        --profile "$BACKEND_PROFILE" up \
-        -d --build --force-recreate
-    check_health "$SERVICE_NAME"
-else
-    echo "docker-compose is not installed."
-    exit 1
-fi
+# Start app (backend + frontend) via app profile
+compose --profile app up -d $BUILD_FLAGS
+check_health "$SERVICE_NAME"
 
 for instance in $(seq 1 "$REPLICAS"); do
     container_name="${PROJECT_NAME}-${SERVICE_NAME}-${instance}"
@@ -146,37 +142,14 @@ done
 # Volume ./domain is mounted at /hs_keys inside the container.
 KEY_LOCATION="/hs_keys/$(basename "$ONION_DIR")/hs_ed25519_secret_key"
 
-# Generate the frontend configuration file.
+# Generate the frontend and monitoring configuration files.
 python3 ./scripts/config_generator.py config --log_level "$LOG_LEVEL" --log_location "$LOG_LOCATION" --domains "${domains[@]}" --key_path "$KEY_LOCATION"
-# Generate the monitoring configuration file.
 python3 ./scripts/config_generator.py monitor_config --master_onion_address "http://${hostname_value}"
 
-if command -v docker-compose >/dev/null 2>&1; then
-    docker-compose -p "$PROJECT_NAME" \
-        -f docker-compose.yaml \
-        --profile "$FRONTEND_PROFILE" up \
-        -d --build --force-recreate
-
-    docker-compose -p "$PROJECT_NAME" \
-        -f docker-compose.yaml \
-        --profile "$MONITOR_PROFILE" up \
-        -d --build --force-recreate
-
-elif command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
-    docker compose -p "$PROJECT_NAME" \
-        -f docker-compose.yaml \
-        --profile "$FRONTEND_PROFILE" up \
-        -d --build --force-recreate
-
-    docker compose -p "$PROJECT_NAME" \
-        -f docker-compose.yaml \
-        --profile "$MONITOR_PROFILE" up \
-        -d --build --force-recreate
-else
-    echo "docker-compose is not installed."
-    exit 1
+# Start monitoring if enabled
+if [ "${MONITORING:-false}" = "true" ]; then
+    compose --profile monitoring up -d $BUILD_FLAGS
 fi
-
 
 # Deactivate the virtual environment
 deactivate

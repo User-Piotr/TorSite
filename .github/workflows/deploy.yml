@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build and push images
@@ -92,20 +95,53 @@ jobs:
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,scope=nginx,mode=max
 
-  # deploy:
-  #   name: Deploy
-  #   needs: build
-  #   runs-on: self-hosted
-  #   environment: production
-  #
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Pull and deploy
-  #       env:
-  #         TAG: ${{ needs.build.outputs.tag }}
-  #         IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
-  #       run: |
-  #         docker compose pull
-  #         docker compose --profile backend --profile frontend up -d --remove-orphans
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: self-hosted
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Inject HS keys
+        env:
+          ONION_ADDRESS: ${{ vars.ONION_ADDRESS }}
+        run: |
+          # Extract hostname from address (strip http:// prefix)
+          HOSTNAME=${ONION_ADDRESS#http://}
+          ONION_DIR="domain/${HOSTNAME}"
+          mkdir -p "$ONION_DIR"
+          chmod 700 domain "$ONION_DIR"
+          echo "${{ secrets.HS_SECRET_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_secret_key"
+          echo "${{ secrets.HS_PUBLIC_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_public_key"
+          echo "$HOSTNAME" > "${ONION_DIR}/hostname"
+          chmod 600 "${ONION_DIR}/hs_ed25519_secret_key" "${ONION_DIR}/hs_ed25519_public_key"
+
+      - name: Generate configs
+        env:
+          ONION_ADDRESS: ${{ vars.ONION_ADDRESS }}
+        run: |
+          HOSTNAME=${ONION_ADDRESS#http://}
+          python3 scripts/config_generator.py ob_config \
+            --master_onion_address "$ONION_ADDRESS"
+          python3 scripts/config_generator.py config \
+            --master_onion_address "$ONION_ADDRESS" \
+            --domains ${{ vars.BACKEND_DOMAINS }} \
+            --log_level notice \
+            --log_location /var/log/tor/onionbalance.log \
+            --key_path "/hs_keys/${HOSTNAME}/hs_ed25519_secret_key"
+          python3 scripts/config_generator.py monitor_config \
+            --master_onion_address "$ONION_ADDRESS"
+          python3 scripts/config_generator.py basic_config
+
+      - name: Pull and deploy
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
+          IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
+        run: |
+          docker compose -p octo pull
+          docker compose -p octo --profile app up -d --remove-orphans
