@@ -129,7 +129,7 @@ services:
     <<: *restart
     deploy:
       mode: replicated
-      replicas: ${REPLICAS:-3}
+      replicas: ${REPLICAS:-2}
       endpoint_mode: vip
       resources:
         limits:

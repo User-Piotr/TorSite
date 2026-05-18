@@ -118,30 +118,25 @@ jobs:
           echo "$ONION_ADDRESS" > "${ONION_DIR}/hostname"
           chmod 600 "${ONION_DIR}/hs_ed25519_secret_key" "${ONION_DIR}/hs_ed25519_public_key"
 
-      - name: Generate configs
-        env:
-          ONION_ADDRESS: ${{ vars.ONION_ADDRESS }}
+      - name: Write .env
         run: |
-          python3 scripts/config_generator.py ob_config \
-            --master_onion_address "$ONION_ADDRESS"
-          python3 scripts/config_generator.py config \
-            --master_onion_address "$ONION_ADDRESS" \
-            --domains ${{ vars.BACKEND_DOMAINS }} \
-            --log_level notice \
-            --log_location /var/log/tor/onionbalance.log \
-            --key_path "/hs_keys/${ONION_ADDRESS}/hs_ed25519_secret_key"
-          python3 scripts/config_generator.py monitor_config \
-            --master_onion_address "http://$ONION_ADDRESS"
-          python3 scripts/config_generator.py basic_config
+          cat > .env << EOF
+          PROJECT_NAME=octo
+          TAG=${{ needs.build.outputs.tag }}
+          IMAGE_PREFIX=${{ needs.build.outputs.image_prefix }}
+          REPLICAS=${{ vars.REPLICAS || 2 }}
+          DIRECTORY=./domain
+          LOG_LEVEL=notice
+          LOG_LOCATION=/var/log/tor/onionbalance.log
+          BUILD=false
+          MONITORING=false
+          ONION_ADDRESS=${{ vars.ONION_ADDRESS }}
+          EOF
 
-      - name: Pull and deploy
-        env:
-          TAG: ${{ needs.build.outputs.tag }}
-          IMAGE_PREFIX: ${{ needs.build.outputs.image_prefix }}
-          REPLICAS: ${{ vars.REPLICAS }}
+      - name: Deploy
         run: |
-          docker compose -p octo pull
-          docker compose -p octo --profile app up -d --remove-orphans
+          make install
+          sudo ./startup.sh
 
       - name: Fix workspace permissions
         if: always()
