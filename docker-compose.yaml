@@ -69,6 +69,8 @@ services:
         target: /onionbalance/config.yaml
     networks:
       - external
+    init: true
+    stop_grace_period: 60s
     <<: *restart
     deploy:
       resources:
@@ -126,6 +128,8 @@ services:
       - external
     depends_on:
       - init-permissions
+    init: true
+    stop_grace_period: 60s
     <<: *restart
     deploy:
       mode: replicated
@@ -281,6 +285,8 @@ services:
       - external
     ports:
       - "127.0.0.1:9050:9050"
+    init: true
+    stop_grace_period: 60s
     <<: *restart
     deploy:
       resources:
