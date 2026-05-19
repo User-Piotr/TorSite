@@ -45,16 +45,7 @@ fi
 
 # Stop docker-compose services
 echo "Shutting down Docker services..."
-if command -v docker-compose >/dev/null 2>&1; then
-    echo "Stopping services using docker-compose..."
-    docker-compose -p "$PROJECT_NAME" down
-elif command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
-    echo "Stopping services using Docker Compose v2..."
-    docker compose -p "$PROJECT_NAME" down
-else
-    echo "docker-compose is not installed."
-    exit 1
-fi
+docker compose -p "$PROJECT_NAME" down
 
 # Optionally remove project images
 if [ "$REMOVE_IMAGE" = true ]; then
