@@ -128,9 +128,6 @@ fi
 
 echo "Running docker-compose..."
 
-# Stop existing services and clean up stale socket before starting fresh
-sudo ./shutdown.sh || true
-
 # Start backends first — frontend needs their domains to generate config.yaml
 compose --profile backend up -d --force-recreate $BUILD_FLAGS
 check_health "$SERVICE_NAME"

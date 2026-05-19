@@ -108,19 +108,6 @@ jobs:
           submodules: recursive
           clean: false
 
-      - name: Inject HS keys
-        env:
-          ONION_ADDRESS: ${{ vars.ONION_ADDRESS }}
-        run: |
-          ONION_DIR="domain/${ONION_ADDRESS}"
-          mkdir -p "$ONION_DIR"
-          echo "${{ secrets.HS_SECRET_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_secret_key"
-          echo "${{ secrets.HS_PUBLIC_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_public_key"
-          echo "$ONION_ADDRESS" > "${ONION_DIR}/hostname"
-          sudo chown -R 100:101 domain/
-          sudo chmod 700 domain/ "$ONION_DIR"
-          sudo chmod 600 "${ONION_DIR}/hs_ed25519_secret_key" "${ONION_DIR}/hs_ed25519_public_key"
-
       - name: Write .env
         run: |
           cat > .env << EOF
@@ -136,9 +123,24 @@ jobs:
           ONION_ADDRESS=${{ vars.ONION_ADDRESS }}
           EOF
 
-      - name: Deploy
+      - name: Shutdown and prepare domain
         run: |
           make install
+          sudo ./shutdown.sh || true
+          sudo chown -R $(whoami):$(whoami) domain/ 2>/dev/null || true
+
+      - name: Inject HS keys
+        env:
+          ONION_ADDRESS: ${{ vars.ONION_ADDRESS }}
+        run: |
+          ONION_DIR="domain/${ONION_ADDRESS}"
+          mkdir -p "$ONION_DIR"
+          echo "${{ secrets.HS_SECRET_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_secret_key"
+          echo "${{ secrets.HS_PUBLIC_KEY }}" | base64 -d > "${ONION_DIR}/hs_ed25519_public_key"
+          echo "$ONION_ADDRESS" > "${ONION_DIR}/hostname"
+
+      - name: Deploy
+        run: |
           sudo ./startup.sh
 
       - name: Fix workspace permissions
