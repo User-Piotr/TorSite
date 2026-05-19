@@ -113,7 +113,7 @@ echo "Setting up directories..."
 # Set permissions and ownership for the directory
 if [ -d "$DIRECTORY" ]; then
     chmod -R 700 "$DIRECTORY"
-    chown -R 100:100 "$DIRECTORY"
+    chown -R 100:101 "$DIRECTORY"
 else
     echo "Directory $DIRECTORY does not exist."
     exit 1
@@ -132,7 +132,7 @@ echo "Running docker-compose..."
 sudo ./shutdown.sh || true
 
 # Start backends first — frontend needs their domains to generate config.yaml
-compose --profile backend up -d $BUILD_FLAGS
+compose --profile backend up -d --force-recreate $BUILD_FLAGS
 check_health "$SERVICE_NAME"
 
 for instance in $(seq 1 "$REPLICAS"); do
@@ -150,7 +150,7 @@ python3 ./scripts/config_generator.py config --log_level "$LOG_LEVEL" --log_loca
 python3 ./scripts/config_generator.py monitor_config --master_onion_address "http://${hostname_value}"
 
 # Start frontend now that config.yaml exists
-compose --profile frontend up -d $BUILD_FLAGS
+compose --profile frontend up -d --force-recreate $BUILD_FLAGS
 
 # Start monitoring if enabled
 if [ "${MONITORING:-false}" = "true" ]; then
