@@ -142,4 +142,4 @@ jobs:
 
       - name: Fix workspace permissions
         if: always()
-        run: sudo chown -R $USER:$USER .
+        run: sudo chown -R $(whoami):$(whoami) .
