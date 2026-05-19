@@ -143,4 +143,5 @@ jobs:
 
       - name: Fix workspace permissions
         if: always()
-        run: sudo chown -R $(whoami):$(whoami) .
+        run: |
+          sudo chmod 755 domain/ domain/*/ 2>/dev/null || true
