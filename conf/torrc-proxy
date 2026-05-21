@@ -8,7 +8,8 @@ Log notice stdout
 ExitRelay 0
 
 # Control Port configuration - Nyx, HealthCheck
-ControlPort 9051
+ControlSocket /var/lib/tor/control
+ControlSocketsGroupWritable 1
 CookieAuthentication 1
 
 # Define the SOCKS port for Tor

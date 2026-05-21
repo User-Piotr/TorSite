@@ -12,7 +12,7 @@ def is_tor_ready() -> bool:
         bool: True if Tor is fully operational, False otherwise.
     """
     try:
-        with Controller.from_port(port=9051) as controller:
+        with Controller.from_socket_file(path="/var/lib/tor/control") as controller:
             controller.authenticate()
             bootstrap_phase = controller.get_info("status/bootstrap-phase")
             print(f"Current bootstrap phase: {bootstrap_phase}")

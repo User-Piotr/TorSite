@@ -17,7 +17,8 @@ HiddenServiceOnionbalanceInstance 1
 ExitRelay 0
 
 # Control Port configuration - Nyx, Vanguards
-ControlPort 9051
+ControlSocket /var/lib/tor/control
+ControlSocketsGroupWritable 1
 CookieAuthentication 1
 
 # Socket configuration - obfs4

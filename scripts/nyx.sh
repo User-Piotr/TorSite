@@ -15,7 +15,7 @@ echo "=============================="
 echo "In the darkness of the Underworld, Nyx, the Night Incarnate, watches over..."
 echo "=============================="
 
-docker exec -it "$CONTAINER_NAME" sh -c 'PYTHONWARNINGS="ignore:invalid escape sequence" nyx'
+docker exec -it "$CONTAINER_NAME" sh -c 'PYTHONWARNINGS="ignore:invalid escape sequence" nyx --interface /var/lib/tor/control'
 
 echo "======================================"
 echo "The night recedes. Until next time, traveler."
