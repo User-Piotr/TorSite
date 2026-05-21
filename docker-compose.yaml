@@ -51,7 +51,7 @@ services:
     security_opt:
       - no-new-privileges:true
     tmpfs:
-      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0755
+      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0750
       - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
       - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
     ulimits:
@@ -105,7 +105,7 @@ services:
     security_opt:
       - no-new-privileges:true
     tmpfs:
-      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0755
+      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0750
       - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
       - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
     ulimits:
@@ -274,7 +274,7 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
-      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0755
+      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0750
       - /tmp:noexec,nosuid,nodev,size=50m
     ulimits:
       core: 0
