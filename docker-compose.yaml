@@ -9,6 +9,7 @@ services:
     container_name: init-permissions
     profiles:
       - backend
+      - frontend
       - app
     cap_drop:
       - ALL
