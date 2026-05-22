@@ -18,19 +18,19 @@ x-tor-tmpfs: &tor-tmpfs
     - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
     - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
 
-x-tor-sysctls: &tor-sysctls
-  sysctls:
-    net.ipv4.tcp_syncookies: 1
-    net.ipv4.conf.all.rp_filter: 1
-    net.ipv4.conf.default.rp_filter: 1
-    net.ipv4.conf.all.accept_redirects: 0
-    net.ipv4.conf.default.accept_redirects: 0
-    net.ipv6.conf.all.accept_redirects: 0
-    net.ipv6.conf.default.accept_redirects: 0
-    net.ipv4.conf.all.accept_source_route: 0
-    net.ipv4.conf.default.accept_source_route: 0
-    net.ipv4.conf.all.send_redirects: 0
-    net.ipv4.conf.default.send_redirects: 0
+# x-tor-sysctls: &tor-sysctls
+#   sysctls:
+#     net.ipv4.tcp_syncookies: 1
+#     net.ipv4.conf.all.rp_filter: 1
+#     net.ipv4.conf.default.rp_filter: 1
+#     net.ipv4.conf.all.accept_redirects: 0
+#     net.ipv4.conf.default.accept_redirects: 0
+#     net.ipv6.conf.all.accept_redirects: 0
+#     net.ipv6.conf.default.accept_redirects: 0
+#     net.ipv4.conf.all.accept_source_route: 0
+#     net.ipv4.conf.default.accept_source_route: 0
+#     net.ipv4.conf.all.send_redirects: 0
+#     net.ipv4.conf.default.send_redirects: 0
 
 services:
   init-permissions:
@@ -75,7 +75,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-frontend
-    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
+    <<: [*tor-hardening, *tor-tmpfs, *restart]
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -121,7 +121,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-backend
-    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
+    <<: [*tor-hardening, *tor-tmpfs, *restart]
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -272,7 +272,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-proxy
-    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
+    <<: [*tor-hardening, *tor-tmpfs, *restart]
     configs:
       - source: torrc-proxy
         target: /etc/tor/torrc
