@@ -139,7 +139,8 @@ services:
     networks:
       - external
     depends_on:
-      - init-permissions
+      init-permissions:
+        condition: service_completed_successfully
     init: true
     stop_grace_period: 60s
     deploy:
