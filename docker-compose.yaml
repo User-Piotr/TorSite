@@ -3,6 +3,35 @@
 x-restart: &restart
   restart: unless-stopped
 
+x-tor-hardening: &tor-hardening
+  cap_drop:
+    - ALL
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  ulimits:
+    core: 0
+
+x-tor-tmpfs: &tor-tmpfs
+  tmpfs:
+    - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0750
+    - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
+    - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
+
+x-tor-sysctls: &tor-sysctls
+  sysctls:
+    net.ipv4.tcp_syncookies: 1
+    net.ipv4.conf.all.rp_filter: 1
+    net.ipv4.conf.default.rp_filter: 1
+    net.ipv4.conf.all.accept_redirects: 0
+    net.ipv4.conf.default.accept_redirects: 0
+    net.ipv6.conf.all.accept_redirects: 0
+    net.ipv6.conf.default.accept_redirects: 0
+    net.ipv4.conf.all.accept_source_route: 0
+    net.ipv4.conf.default.accept_source_route: 0
+    net.ipv4.conf.all.send_redirects: 0
+    net.ipv4.conf.default.send_redirects: 0
+
 services:
   init-permissions:
     image: alpine:3.22.0
@@ -46,17 +75,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-frontend
-    cap_drop:
-      - ALL
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    tmpfs:
-      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0750
-      - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
-      - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
-    ulimits:
-      core: 0
+    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -77,7 +96,6 @@ services:
         condition: service_healthy
     init: true
     stop_grace_period: 60s
-    <<: *restart
     deploy:
       resources:
         limits:
@@ -105,17 +123,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-backend
-    cap_drop:
-      - ALL
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    tmpfs:
-      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0750
-      - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
-      - /tmp:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1777
-    ulimits:
-      core: 0
+    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -136,7 +144,6 @@ services:
       - init-permissions
     init: true
     stop_grace_period: 60s
-    <<: *restart
     deploy:
       mode: replicated
       replicas: ${REPLICAS:-2}
@@ -170,23 +177,16 @@ services:
       args:
         - HUGO_BASEURL=http://${ONION_ADDRESS:-localhost:80}
         - NGINX_VERSION=1.27.5
-    cap_drop:
-      - ALL
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
+    <<: [*tor-hardening, *restart]
     tmpfs:
       - /var/cache/nginx:noexec,nosuid,nodev,size=50m,uid=101,gid=101,mode=1777
       - /tmp:noexec,nosuid,nodev,size=50m,uid=101,gid=101,mode=1777
-    ulimits:
-      core: 0
     volumes:
       - ./shared:/run/app/
     network_mode: "none"
     depends_on:
       tor-backend:
         condition: service_healthy
-    <<: *restart
     deploy:
       resources:
         limits:
@@ -273,17 +273,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-proxy
-    cap_drop:
-      - ALL
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    tmpfs:
-      - /var/log/tor:noexec,nosuid,nodev,size=50m,uid=100,gid=101,mode=1755
-      - /var/lib/tor:noexec,nosuid,nodev,size=100m,uid=100,gid=101,mode=0750
-      - /tmp:noexec,nosuid,nodev,size=50m
-    ulimits:
-      core: 0
+    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
     configs:
       - source: torrc-proxy
         target: /etc/tor/torrc
@@ -293,7 +283,6 @@ services:
       - "127.0.0.1:9050:9050"
     init: true
     stop_grace_period: 60s
-    <<: *restart
     deploy:
       resources:
         limits:
