@@ -143,6 +143,11 @@ jobs:
         run: |
           sudo ./startup.sh
 
+      - name: Scrub injected keys
+        if: always()
+        run: |
+          rm -f domain/*/hs_ed25519_secret_key domain/*/hs_ed25519_public_key
+
       - name: Fix workspace permissions
         if: always()
         run: |
