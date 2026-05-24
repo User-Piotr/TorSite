@@ -70,6 +70,7 @@ services:
       - FIREWALL=on
       - DOT=off
       - DNS_ADDRESS=${MULLVAD_DNS}
+      - MTU=1280
     networks:
       - external
     <<: [*restart, *tor-logging]
