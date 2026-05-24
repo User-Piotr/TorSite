@@ -123,9 +123,7 @@ jobs:
           ONION_ADDRESS=${{ vars.ONION_ADDRESS }}
           MULLVAD_PRIVATE_KEY=${{ secrets.MULLVAD_PRIVATE_KEY }}
           MULLVAD_ADDRESSES=${{ secrets.MULLVAD_ADDRESSES }}
-          MULLVAD_DNS=${{ secrets.MULLVAD_DNS }}
           MULLVAD_SERVER_COUNTRIES=${{ vars.MULLVAD_SERVER_COUNTRIES || 'Sweden' }}
-          MULLVAD_SERVER_CITIES=${{ vars.MULLVAD_SERVER_CITIES || '' }}
           EOF
 
       - name: Shutdown and prepare domain

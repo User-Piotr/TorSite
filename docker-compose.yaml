@@ -66,11 +66,6 @@ services:
       - WIREGUARD_PRIVATE_KEY=${MULLVAD_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${MULLVAD_ADDRESSES:-10.0.0.1/32}
       - SERVER_COUNTRIES=${MULLVAD_SERVER_COUNTRIES:-Sweden}
-      - SERVER_CITIES=${MULLVAD_SERVER_CITIES:-}
-      - FIREWALL=on
-      - DOT=off
-      - DNS_ADDRESS=${MULLVAD_DNS}
-      - MTU=1280
     networks:
       - external
     <<: [*restart, *tor-logging]
@@ -83,10 +78,10 @@ services:
           cpus: '0.25'
           memory: 64M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:9999/v1/vpn/status || exit 1"]
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
       interval: 10s
       timeout: 5s
-      start_period: 30s
+      start_period: 60s
       retries: 3
 
   init-permissions:
