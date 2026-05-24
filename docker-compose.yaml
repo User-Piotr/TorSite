@@ -49,6 +49,44 @@ x-tor-logging: &tor-logging
       compress: "true"
 
 services:
+  gluetun:
+    image: ghcr.io/qdm12/gluetun:v3.40.0
+    container_name: gluetun
+    profiles:
+      - backend
+      - frontend
+      - app
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${MULLVAD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${MULLVAD_ADDRESSES:-10.0.0.1/32}
+      - SERVER_COUNTRIES=${MULLVAD_SERVER_COUNTRIES:-Sweden}
+      - SERVER_CITIES=${MULLVAD_SERVER_CITIES:-}
+      - FIREWALL=on
+      - DOT=off
+    networks:
+      - external
+    <<: [*restart, *tor-logging]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9999/v1/vpn/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
   init-permissions:
     image: alpine:3.22.0
     container_name: init-permissions
@@ -104,11 +142,12 @@ services:
         target: /etc/tor/vanguards.conf
       - source: ob-balance-config
         target: /onionbalance/config.yaml
-    networks:
-      - external
+    network_mode: "service:gluetun"
     depends_on:
       init-permissions:
         condition: service_completed_successfully
+      gluetun:
+        condition: service_healthy
     init: true
     stop_grace_period: 60s
     deploy:
@@ -154,11 +193,12 @@ services:
         uid: "100"
         gid: "101"
         mode: 0600
-    networks:
-      - external
+    network_mode: "service:gluetun"
     depends_on:
       init-permissions:
         condition: service_completed_successfully
+      gluetun:
+        condition: service_healthy
     init: true
     stop_grace_period: 60s
     deploy:
