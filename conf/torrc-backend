@@ -22,7 +22,7 @@ ControlSocketsGroupWritable 1
 CookieAuthentication 1
 
 SocksPort 0
-HTTPSProxy http://gluetun:8888
+HTTPSProxy gluetun:8888
 
 # Bridges disabled — Tor routes via Gluetun (Mullvad WireGuard VPN)
 # Uncomment below to re-enable bridges instead of VPN
