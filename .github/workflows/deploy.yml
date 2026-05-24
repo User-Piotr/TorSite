@@ -126,7 +126,7 @@ jobs:
       - name: Shutdown and prepare domain
         run: |
           make install
-          sudo ./shutdown.sh || true
+          sudo ./shutdown.sh --remove-images || true
           sudo chown -R $(whoami):$(whoami) domain/ 2>/dev/null || true
 
       - name: Inject HS keys

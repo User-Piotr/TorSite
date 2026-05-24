@@ -40,6 +40,14 @@ x-tor-sysctls: &tor-sysctls
     net.ipv4.conf.all.send_redirects: 0
     net.ipv4.conf.default.send_redirects: 0
 
+x-tor-logging: &tor-logging
+  logging:
+    driver: local
+    options:
+      max-size: "10m"
+      max-file: "3"
+      compress: "true"
+
 services:
   init-permissions:
     image: alpine:3.22.0
@@ -83,7 +91,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-frontend
-    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
+    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart, *tor-logging]
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -129,7 +137,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-backend
-    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
+    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart, *tor-logging]
     environment:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
@@ -191,6 +199,8 @@ services:
     volumes:
       - ./shared:/run/app/
     network_mode: "none"
+    logging:
+      driver: none
     depends_on:
       tor-backend:
         condition: service_healthy
@@ -225,7 +235,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - internal
-    <<: *restart
+    <<: [*restart, *tor-logging]
     deploy:
       resources:
         limits:
@@ -257,7 +267,7 @@ services:
         condition: service_healthy
       docker-socket-proxy:
         condition: service_started
-    <<: *restart
+    <<: [*restart, *tor-logging]
     deploy:
       resources:
         limits:
@@ -280,7 +290,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tor-proxy
-    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart]
+    <<: [*tor-hardening, *tor-tmpfs, *tor-sysctls, *restart, *tor-logging]
     configs:
       - source: torrc-proxy
         target: /etc/tor/torrc
