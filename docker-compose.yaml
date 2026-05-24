@@ -96,6 +96,7 @@ services:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
       - ./domain:/hs_keys
+      - vanguards-state-frontend:/var/lib/tor/vanguards
     configs:
       - source: torrc-frontend
         target: /etc/tor/torrc
@@ -142,6 +143,7 @@ services:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
       - ./shared:/run/app/
+      - vanguards-state-backend:/var/lib/tor/vanguards
     configs:
       - source: torrc-backend
         target: /etc/tor/torrc
@@ -317,6 +319,10 @@ services:
     labels:
       - "com.octo.service=proxy"
       - "com.octo.version=${VERSION:-dev}"
+
+volumes:
+  vanguards-state-frontend: {}
+  vanguards-state-backend: {}
 
 networks:
   internal:
