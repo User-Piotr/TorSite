@@ -64,8 +64,10 @@ services:
       - VPN_SERVICE_PROVIDER=mullvad
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${MULLVAD_PRIVATE_KEY}
-      - WIREGUARD_ADDRESSES=${MULLVAD_ADDRESSES:-10.0.0.1/32}
+      - WIREGUARD_ADDRESSES=${MULLVAD_ADDRESSES}
       - SERVER_COUNTRIES=${MULLVAD_SERVER_COUNTRIES:-Sweden}
+      - HTTPPROXY=on
+      - HTTPPROXY_PORT=8888
     networks:
       - external
     <<: [*restart, *tor-logging]
@@ -131,7 +133,6 @@ services:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
       - ./domain:/hs_keys
-      - vanguards-state-frontend:/var/lib/tor/vanguards
     configs:
       - source: torrc-frontend
         target: /etc/tor/torrc
@@ -139,7 +140,8 @@ services:
         target: /etc/tor/vanguards.conf
       - source: ob-balance-config
         target: /onionbalance/config.yaml
-    network_mode: "service:gluetun"
+    networks:
+      - external
     depends_on:
       init-permissions:
         condition: service_completed_successfully
@@ -189,7 +191,8 @@ services:
         uid: "100"
         gid: "101"
         mode: 0600
-    network_mode: "service:gluetun"
+    networks:
+      - external
     depends_on:
       init-permissions:
         condition: service_completed_successfully
@@ -355,9 +358,6 @@ services:
     labels:
       - "com.octo.service=proxy"
       - "com.octo.version=${VERSION:-dev}"
-
-volumes:
-  vanguards-state-frontend: {}
 
 networks:
   internal:
