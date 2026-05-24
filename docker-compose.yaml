@@ -69,6 +69,7 @@ services:
       - SERVER_CITIES=${MULLVAD_SERVER_CITIES:-}
       - FIREWALL=on
       - DOT=off
+      - DNS_ADDRESS=${MULLVAD_DNS}
     networks:
       - external
     <<: [*restart, *tor-logging]
