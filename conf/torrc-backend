@@ -21,7 +21,7 @@ ControlSocket /var/lib/tor/control
 ControlSocketsGroupWritable 1
 CookieAuthentication 1
 
-SocksPort 9050
+SocksPort 0
 
 # Bridges disabled — Tor routes via Gluetun (Mullvad WireGuard VPN)
 # Uncomment below to re-enable bridges instead of VPN
