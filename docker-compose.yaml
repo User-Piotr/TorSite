@@ -179,7 +179,6 @@ services:
       - VANGUARDS_CONFIG=/etc/tor/vanguards.conf
     volumes:
       - ./shared:/run/app/
-      - vanguards-state-backend:/var/lib/tor/vanguards
     configs:
       - source: torrc-backend
         target: /etc/tor/torrc
@@ -359,7 +358,6 @@ services:
 
 volumes:
   vanguards-state-frontend: {}
-  vanguards-state-backend: {}
 
 networks:
   internal:
