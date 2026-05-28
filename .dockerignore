@@ -3,6 +3,8 @@
 Makefile
 
 .claude
+.env
+.env.*
 
 domain/
 shared/
