@@ -56,8 +56,12 @@ services:
       - backend
       - frontend
       - app
+    cap_drop:
+      - ALL
     cap_add:
       - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:

@@ -15,6 +15,7 @@ HiddenServiceOnionbalanceInstance 1
 
 # Avoid running as an exit relay
 ExitRelay 0
+ExitPolicy reject *:*
 
 # Control Port configuration - Nyx, Vanguards
 ControlSocket /var/lib/tor/control
