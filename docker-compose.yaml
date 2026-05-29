@@ -61,6 +61,7 @@ services:
     cap_add:
       - NET_ADMIN
       - DAC_OVERRIDE
+      - CHOWN
     security_opt:
       - no-new-privileges:true
     tmpfs:
