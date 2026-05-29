@@ -62,6 +62,8 @@ services:
       - NET_ADMIN
     security_opt:
       - no-new-privileges:true
+    tmpfs:
+      - /tmp:noexec,nosuid,nodev,size=50m,mode=1777
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
