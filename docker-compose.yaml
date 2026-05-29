@@ -62,6 +62,7 @@ services:
       - NET_ADMIN
       - DAC_OVERRIDE
       - CHOWN
+    read_only: true
     security_opt:
       - no-new-privileges:true
     tmpfs:
