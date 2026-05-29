@@ -62,12 +62,10 @@ services:
       - NET_ADMIN
       - DAC_OVERRIDE
       - CHOWN
-    read_only: true
     security_opt:
       - no-new-privileges:true
     tmpfs:
       - /tmp:noexec,nosuid,nodev,size=50m,mode=1777
-      - /gluetun:noexec,nosuid,nodev,size=50m,mode=0750
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
