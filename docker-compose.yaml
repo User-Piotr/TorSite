@@ -60,6 +60,7 @@ services:
       - ALL
     cap_add:
       - NET_ADMIN
+      - DAC_OVERRIDE
     security_opt:
       - no-new-privileges:true
     tmpfs:
