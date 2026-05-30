@@ -79,12 +79,12 @@ services:
     networks:
       - external
     <<: [*restart, *tor-logging]
-    pids_limit: 50
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 128M
+          pids: 50
         reservations:
           cpus: '0.25'
           memory: 64M
@@ -119,12 +119,12 @@ services:
       chown -R 100:101 /run/app && \
       chmod 775 /run/app
       "
-    pids_limit: 10
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 128M
+          pids: 10
         reservations:
           cpus: '0.25'
           memory: 64M
@@ -159,12 +159,12 @@ services:
         condition: service_healthy
     init: true
     stop_grace_period: 60s
-    pids_limit: 512
     deploy:
       resources:
         limits:
           cpus: '1.0'
           memory: 256M
+          pids: 512
         reservations:
           cpus: '0.5'
           memory: 128M
@@ -211,7 +211,6 @@ services:
         condition: service_healthy
     init: true
     stop_grace_period: 60s
-    pids_limit: 512
     deploy:
       mode: replicated
       replicas: ${REPLICAS:-2}
@@ -220,6 +219,7 @@ services:
         limits:
           cpus: '1.0'
           memory: 256M
+          pids: 512
         reservations:
           cpus: '0.5'
           memory: 128M
@@ -257,12 +257,12 @@ services:
     depends_on:
       tor-backend:
         condition: service_healthy
-    pids_limit: 50
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 128M
+          pids: 50
         reservations:
           cpus: '0.25'
           memory: 64M
@@ -290,12 +290,12 @@ services:
     networks:
       - internal
     <<: [*restart, *tor-logging]
-    pids_limit: 20
     deploy:
       resources:
         limits:
           cpus: '0.1'
           memory: 64M
+          pids: 20
         reservations:
           cpus: '0.05'
           memory: 32M
@@ -323,12 +323,12 @@ services:
       docker-socket-proxy:
         condition: service_started
     <<: [*restart, *tor-logging]
-    pids_limit: 200
     deploy:
       resources:
         limits:
           cpus: '0.25'
           memory: 256M
+          pids: 200
         reservations:
           cpus: '0.1'
           memory: 64M
@@ -356,12 +356,12 @@ services:
       - "127.0.0.1:9050:9050"
     init: true
     stop_grace_period: 60s
-    pids_limit: 512
     deploy:
       resources:
         limits:
           cpus: '0.25'
           memory: 256M
+          pids: 512
         reservations:
           cpus: '0.1'
           memory: 64M
