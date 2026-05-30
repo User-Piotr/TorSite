@@ -79,6 +79,7 @@ services:
     networks:
       - external
     <<: [*restart, *tor-logging]
+    pids_limit: 50
     deploy:
       resources:
         limits:
@@ -118,6 +119,7 @@ services:
       chown -R 100:101 /run/app && \
       chmod 775 /run/app
       "
+    pids_limit: 10
     deploy:
       resources:
         limits:
@@ -157,6 +159,7 @@ services:
         condition: service_healthy
     init: true
     stop_grace_period: 60s
+    pids_limit: 512
     deploy:
       resources:
         limits:
@@ -208,6 +211,7 @@ services:
         condition: service_healthy
     init: true
     stop_grace_period: 60s
+    pids_limit: 512
     deploy:
       mode: replicated
       replicas: ${REPLICAS:-2}
@@ -253,6 +257,7 @@ services:
     depends_on:
       tor-backend:
         condition: service_healthy
+    pids_limit: 50
     deploy:
       resources:
         limits:
@@ -285,6 +290,7 @@ services:
     networks:
       - internal
     <<: [*restart, *tor-logging]
+    pids_limit: 20
     deploy:
       resources:
         limits:
@@ -317,6 +323,7 @@ services:
       docker-socket-proxy:
         condition: service_started
     <<: [*restart, *tor-logging]
+    pids_limit: 200
     deploy:
       resources:
         limits:
@@ -349,6 +356,7 @@ services:
       - "127.0.0.1:9050:9050"
     init: true
     stop_grace_period: 60s
+    pids_limit: 512
     deploy:
       resources:
         limits:
