@@ -30,8 +30,6 @@ ConfluxEnabled 0
 
 ClientTransportPlugin obfs4 exec /usr/bin/lyrebird
 
-Bridge obfs4 69.12.64.228:9130 259E403602D036FDFA567C27C06407D6148CC58F cert=mqj2WDKZ8FyJJ++ukXXNzhJPm6EHCUytmqSW8ML1qtAf+ftJC48nxIVRjUf57T37P47eQg iat-mode=0
-Bridge obfs4 83.9.160.198:9876 56CAE8C1DC4CFE96482908C86E35D1CB1A2AAB8C cert=a7eBKn/3uihsAo+c9PF3wyq+sutKeCY/etZ1rJm8Y7wy5C5lhkucH/QY0z0fO3KNVvfqDw iat-mode=0
 Bridge obfs4 107.210.123.168:8080 336BC480CB125457C0750840F3066AA3A547FCF1 cert=JcieuQi1sZw807G/GJUXdaTaQpECLwKAx72EUJLpGq/ofVPx8Z6ZCOY93YxCptmbq5PjMw iat-mode=0
 Bridge obfs4 108.223.187.43:30913 227048B601E26ADBF20E5AB5BA2FE9D36349E9E8 cert=17UZ0iPdgNhgr9N34wba1x4MeND4dWiR11YTvBgGo8q++/GGSv+qKVzICRZweojfaHS/Gg iat-mode=0
 # ─────────────────────────────────────────────────────────────────────────────

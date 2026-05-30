@@ -54,7 +54,7 @@ Each Tor container connects independently through Gluetun to the Tor network.
 | docker-socket-proxy | Read-only Docker socket filter for kuma |
 
 **VPN:** Mullvad WireGuard via gluetun — all outbound Tor traffic tunneled  
-**Transport:** obfs4 (lyrebird) + Snowflake available — disabled by default, enable via HIGH-THREAT block in torrc  
+**Transport:** obfs4 (lyrebird) available — disabled by default, enable via HIGH-THREAT block in torrc  
 **Vanguards:** bandguards, rendguards, circuit close-on-attack enabled  
 **Supervisord:** manages Tor + onionbalance + vanguards — auto-restarts on crash  
 **CI/CD:** GitHub Actions → GHCR
