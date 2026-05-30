@@ -1,19 +1,5 @@
 #####################################################################
 
-FROM alpine:3.22.0 AS builder
-
-# Install required packages
-RUN apk add --no-cache \
-    go=1.24.13-r0 \
-    git=2.49.1-r0
-
-# Build the Snowflake client — pinned to v2.13.1
-RUN git clone --depth=1 --branch v2.13.1 \
-    https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git /snowflake && \
-    cd /snowflake/client && \
-    go build -o /usr/bin/snowflake-client .
-
-# Use the Alpine image
 FROM alpine:3.22.0
 
 LABEL maintainer="Piotr K."
@@ -71,10 +57,6 @@ RUN find /venv/lib/python3.12/site-packages/vanguards -type f -exec sed -i 's/Sa
 # The vanguards package still uses readfp, which is incompatible with Python 3.12. To ensure
 # continued functionality, the readfp references are updated to read_file.
 RUN find /venv/lib/python3.12/site-packages/vanguards -type f -exec sed -i 's/readfp/read_file/g' {} \;
-
-#? NOTE: Snowflake has become less stable; replaced with obfs4proxy for improved reliability.
-# Copy the Snowflake binary
-COPY --from=builder /usr/bin/snowflake-client /usr/bin/snowflake-client
 
 # Copy the scripts
 COPY ./bin/tor/get_tor_connection_status.py /etc/tor/scripts/get_tor_connection_status.py
