@@ -23,18 +23,18 @@ Self-hosted Tor hidden service — OnionBalance, Gluetun (WireGuard), nginx + Hu
                          │  (WireGuard)  │
                          └──┬────┬────┬──┘
                             │    │    │
-               ┌────────────┘    │    └───────────┐
-               │                 │                │
-       ┌───────▼────────┐ ┌──────▼──────┐ ┌───────▼────────┐
-       │  tor-frontend  │ │ tor-backend │ │  tor-backend   │
-       │ (OnionBalance) │ │      1      │ │       2        │
-       └────────────────┘ └──────┬──────┘ └────────┬───────┘
-                                 └────────┬────────┘
-                                          │ Unix socket
-                                   ┌──────▼──────┐
-                                   │    nginx    │
-                                   │ (Hugo site) │
-                                   └─────────────┘
+               ┌────────────┘    │    └──────────┐
+               │                 │               │
+       ┌───────▼────────┐ ┌──────▼──────┐ ┌──────▼──────┐
+       │  tor-frontend  │ │ tor-backend │ │ tor-backend │
+       │ (OnionBalance) │ │      1      │ │      2      │
+       └────────────────┘ └──────┬──────┘ └──────┬──────┘ 
+                                 └───────┬───────┘
+                                         │ Unix socket
+                                  ┌──────▼──────┐
+                                  │    nginx    │
+                                  │ (Hugo site) │
+                                  └─────────────┘
 ```
 
 ## Prerequisites
