@@ -9,32 +9,8 @@ Self-hosted Tor hidden service — OnionBalance, Gluetun (WireGuard), nginx + Hu
 
 ## Architecture
 
-```
-                         ┌───────────────┐
-                         │  Tor Network  │
-                         └───────┬───────┘
-                                 │
-                         ┌───────▼───────┐
-                         │  obfs4 Bridge │  ← HIGH-THREAT mode (optional)
-                         └───────┬───────┘
-                                 │
-                         ┌───────▼───────┐
-                         │    gluetun    │
-                         │  (WireGuard)  │
-                         └──┬────┬────┬──┘
-                            │    │    │
-               ┌────────────┘    │    └──────────┐
-               │                 │               │
-       ┌───────▼────────┐ ┌──────▼──────┐ ┌──────▼──────┐
-       │  tor-frontend  │ │ tor-backend │ │ tor-backend │
-       │ (OnionBalance) │ │      1      │ │      2      │
-       └────────────────┘ └──────┬──────┘ └──────┬──────┘ 
-                                 └───────┬───────┘
-                                         │ Unix socket
-                                  ┌──────▼──────┐
-                                  │    nginx    │
-                                  │ (Hugo site) │
-                                  └─────────────┘
+![traffic](images/onion-traffic.png)
+
 ```
 
 ## Prerequisites
